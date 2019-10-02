@@ -72,14 +72,16 @@ GB_elev_timezone_corr <- cor.test(GBdata$elev, GBdata$Time_Zones, method=c("pear
 EA_elev_timezone_corr <- cor.test(EAdata$elev, EAdata$Time_Zones, method=c("pearson"))
 #standard deviation is 0? cor= na
 
+
+
 ####################correlation between distance from terminus and elevation##################
 
 HM_elev_distance_corr <- cor.test(HMdata$elev, HMdata$dist, method=c("pearson"))
-#-0.57
+#-0.57 psig
 GB_elev_distance_corr <- cor.test(GBdata$elev, GBdata$dist, method=c("pearson"))
-#-0.46
+#-0.46 psig
 EA_elev_distance_corr <- cor.test(EAdata$elev, EAdata$dist, method=c("pearson"))
-#-0.93
+#-0.93 psig
 
 #Separating for Density- Making Separate Dataframe with just number of plants at each site
 #37 sites
@@ -185,8 +187,10 @@ density_old <- data.frame(Sites_2, Number_of_Plants, timezones,forelands)
 
 
 ################################density and timezone##########################################
-density_df$Foreland_Code <- avg_stemcount$Foreland_Code 
+density_df <- density_old 
+density_df$Foreland_Code <- avg_stemcount$Foreland_Code
 density_df$numerical_timezones <- timezones_numerical
+density_df$distance_from_2016 <- distance_from_2016
 
 library(ggplot2)
 
@@ -200,7 +204,7 @@ density_timezone_boxplot <-  ggplot(density_df, aes(x=timezones, y=Number_of_Pla
   geom_boxplot()+labs(x="Time Zone",y= "Number of Plants", title="Density vs. Time Zone") +scale_x_discrete(limits=c("Less than LIAM", "1910","1912","1928","1949","1977","2003"))
 
 ###Linear model for timezone and density
-model_density_timezone <- lmer(Number_of_Plants ~ timezones + (1|Foreland_Code), data=density_df )
+model_density_timezone <- lmer(Number_of_Plants ~ timezones + (1|Foreland_Code), data = density_df )
 summary(model_density_timezone)
 anova(model_density_timezone)
 
@@ -208,14 +212,20 @@ install.packages("lme4")
 library(lme4)
 install.packages("lmerTest")
 library(lmerTest)
-###might have to update R to use lmerTest
+
 #can add degree of freedom ddf="Kenward-Roger"
 #write as lmerTest::anova()
+#lmerTest::anova() doesn't work with new cran update?
 
-###visreg
+#########visreg for density and timezone###
+install.packages("visreg")
+library(visreg)
 
-#visreg(dataframe, xvar="",by= "",cond=",overlay="")
+testmodel_density_timezone <- visreg(model_density_timezone, "Foreland_Code", type="contrast")
 
+##eg. code
+testmodel <- visreg(model, xvar="",by= "",cond="",overlay="")
+visreg(fit, "Wind", type="contrast")
 
 
 ##################################stem count and timezone#####################################
@@ -243,8 +253,12 @@ model_stemcount_timezone <- lmer(SC_new ~ timezone + (1|Foreland_Code), data=avg
 summary(model_stemcount_timezone)
 anova(model_stemcount_timezone)
 
+testmodel_stemcount_timezone <- visreg(model_stemcount_timezone, "Foreland_Code", type="contrast")
+
+
 ################prop. flowering and timezone###################################################
 
+#making column with yes/no as 0/1 for flowering
 lewisii_data$flowering_numerical <- ifelse(lewisii_data$Flowering=='Y', 1,0)
 
 prop_flowering <- lewisii_data %>% select(Site,flowering_numerical,Foreland_Code) %>% 
@@ -254,6 +268,7 @@ prop_flowering <- lewisii_data %>% select(Site,flowering_numerical,Foreland_Code
   unique() 
 prop_flowering$timezone <- timezones
 prop_flowering$numerical_timezones <- timezones_numerical
+
 
 #####Scatter plot with time zone and prop flowering
 
@@ -270,6 +285,8 @@ model_flowering_timezone <- lmer(prop_f_site ~ timezone + (1|Foreland_Code), dat
 summary(model_flowering_timezone)
 anova(model_flowering_timezone)
 
+testmodel_flowering_timezone <- visreg(model_flowering_timezone)
+
 
 ##################################################Density and Distance from 2016######################################
 
@@ -283,7 +300,9 @@ geom_point()+geom_smooth(method = "lm")+ labs(x="Distance from 2016 Line (m)", y
 
 model_density_distance <- lmer(Number_of_Plants ~ distance_from_2016 + (1|Foreland_Code), data=density_df )
 summary(model_density_distance)
-anova(model_density_distance)
+
+testmodel_density_distance <- visreg(model_density_distance)
+
 
 ############################################Stem Count and Distance from 2016######################
 
@@ -299,7 +318,9 @@ stemcount_distance_scatter <-
 
 model_stemcount_distance <- lmer(SC_new ~ distance_from_2016 + (1|Foreland_Code), data=avg_stemcount )
 summary(model_density_distance)
-anova(model_density_distance)
+
+testmodel_stemcount_distance <- visreg(model_stemcount_distance)
+
 
 #########################################Proportion Flowering and Distance from 2016###############
 
@@ -313,9 +334,15 @@ flowering_timezone_scatter <- ggplot(prop_flowering, aes(x = distance_from_2016,
 
 model_flowering_distance <- lmer(prop_f_site ~ distance_from_2016 + (1|Foreland_Code), data=prop_flowering )
 summary(model_flowering_distance)
-anova(model_flowering_distance)
+
+testmodel_flowering_distance <- visreg(model_flowering_distance)
 
 
+
+
+
+
+##########notes ect#####################
 
 #same code to do ANOVA w/linear model
 m <-lm(formula = SC_new ~ timezone, data = avg_stemcount_df)
