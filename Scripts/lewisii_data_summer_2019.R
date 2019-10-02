@@ -221,7 +221,7 @@ library(lmerTest)
 install.packages("visreg")
 library(visreg)
 
-testmodel_density_timezone <- visreg(model_density_timezone, "Foreland_Code", type="contrast")
+testmodel_density_timezone <- visreg(model_density_timezone)
 
 ##eg. code
 testmodel <- visreg(model, xvar="",by= "",cond="",overlay="")
@@ -317,7 +317,8 @@ stemcount_distance_scatter <-
 ###model for stem count and distance
 
 model_stemcount_distance <- lmer(SC_new ~ distance_from_2016 + (1|Foreland_Code), data=avg_stemcount )
-summary(model_density_distance)
+summary(model_stemcount_distance)
+anova(model_stemcount_distance)
 
 testmodel_stemcount_distance <- visreg(model_stemcount_distance)
 
@@ -334,6 +335,7 @@ flowering_timezone_scatter <- ggplot(prop_flowering, aes(x = distance_from_2016,
 
 model_flowering_distance <- lmer(prop_f_site ~ distance_from_2016 + (1|Foreland_Code), data=prop_flowering )
 summary(model_flowering_distance)
+anova(model_flowering_distance)
 
 testmodel_flowering_distance <- visreg(model_flowering_distance)
 
@@ -365,7 +367,9 @@ timezone_density <- glmer(Stem_Count ~ Zone + (1|Site), data=lewisii_data, famil
   link = log))
 
 
-
+#make 1912 part of 1910 for easton 
+#split non-flowering into adults and recruits - add proportion of seedlings as new variable? 
+#filter out easton
 
 
                                     
