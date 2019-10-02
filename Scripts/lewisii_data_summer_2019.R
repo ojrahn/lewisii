@@ -15,14 +15,9 @@ lewisii_data$stemcount <- as.numeric(lewisii_data$Stem_Count)
 lewisii_data$elev <- as.numeric(lewisii_data$Elevation)
 lewisii_data$dist <- as.numeric(lewisii_data$Distance_from_Glacial_Terminus_.m.)
 lewisii_data$Zone <- as.factor(lewisii_data$Zone)
-timezones <- c(1928,1928,1928,1949,"Less than LIAM","Less than LIAM","Less than LIAM",1928,"Less than LIAM","Less than LIAM",1910,1928,1910,1910,
-               1912,1912,1912,1928,1928,1928,2003,2003,2003,1977,1977,1949,1949,1977,1928,1928,1928,1928,"Less than LIAM","Less than LIAM")
-timezones_numerical <- c(1928,1928,1928,1949,1600,1600,1600,1928,1600,1600,1910,1928,1910,1910,
-               1912,1912,1912,1928,1928,1928,2003,2003,2003,1977,1977,1949,1949,1977,1928,1928,1928,1928,1600,1600)
+timezones <- c(1928,1928,1928,1949,"Less than LIAM","Less than LIAM","Less than LIAM",1928,"Less than LIAM","Less than LIAM",1910,1928,1910,1910,1928,1928,1928,2003,2003,2003,1977,1977,1949,1949,1977,1928,1928,1928,1928,"Less than LIAM","Less than LIAM")
+timezones_numerical <- c(1928,1928,1928,1949,1600,1600,1600,1928,1600,1600,1910,1928,1910,1910,1928,1928,1928,2003,2003,2003,1977,1977,1949,1949,1977,1928,1928,1928,1928,1600,1600)
 
-forelands <- c("Helm","Helm","Helm","Helm","Helm","Helm","Helm","Garibaldi","Garibaldi","Garibaldi","Garibaldi","Garibaldi","Garibaldi","Garibaldi",
-               "Easton","Easton","Easton","Helm","Helm","Helm","Helm","Helm","Helm","Helm","Helm","Helm","Helm","Helm",
-               "Helm","Helm","Helm","Helm","Helm","Helm")
 
 #Mutating zone column so that "core" is an arbitrary number (to read in column as numerical)
 
@@ -37,6 +32,10 @@ lewisii_data$Time_Zone <- as.numeric(lewisii_data$Time_Zone)
 #taking out Coleman data since all transects were done in the same zone
 
 lewisii_data <- lewisii_data[!grepl("CM", lewisii_data$Site),]
+
+#take out Easton data since all transects were done in the same zone
+
+lewisii_data <- lewisii_data[!grepl("EA",lewisii_data$Site),]
 
 #Add column with just site code letters, no numbers
 
@@ -69,10 +68,6 @@ HM_elev_timezone_corr <- cor.test(HMdata$elev, HMdata$Time_Zones, method=c("pear
 #0.35 psig
 GB_elev_timezone_corr <- cor.test(GBdata$elev, GBdata$Time_Zones, method=c("pearson"))
 #0.05 p 0.11
-EA_elev_timezone_corr <- cor.test(EAdata$elev, EAdata$Time_Zones, method=c("pearson"))
-#standard deviation is 0? cor= na
-
-
 
 ####################correlation between distance from terminus and elevation##################
 
@@ -80,8 +75,7 @@ HM_elev_distance_corr <- cor.test(HMdata$elev, HMdata$dist, method=c("pearson"))
 #-0.57 psig
 GB_elev_distance_corr <- cor.test(GBdata$elev, GBdata$dist, method=c("pearson"))
 #-0.46 psig
-EA_elev_distance_corr <- cor.test(EAdata$elev, EAdata$dist, method=c("pearson"))
-#-0.93 psig
+
 
 #Separating for Density- Making Separate Dataframe with just number of plants at each site
 #37 sites
@@ -100,12 +94,6 @@ GB10_df<- subset(lewisii_data, Site == "GB10")
 GB21_df<- subset(lewisii_data, Site == "GB21")
 GB22_df<- subset(lewisii_data, Site == "GB22")
 GB17_df<- subset(lewisii_data, Site == "GB17")
-CM05_df<- subset(lewisii_data, Site == "CM05")
-CM04_df<- subset(lewisii_data, Site == "CM04")
-CM02_df<- subset(lewisii_data, Site == "CM02")
-EA09_df<- subset(lewisii_data, Site == "EA09")
-EA06_df<- subset(lewisii_data, Site == "EA06")
-EA02_df<- subset(lewisii_data, Site == "EA02")
 HM08_df<- subset(lewisii_data, Site == "HM08")
 HM16_df<- subset(lewisii_data, Site == "HM16")
 HM15_df<- subset(lewisii_data, Site == "HM15")
@@ -140,12 +128,6 @@ GB10_num_plants<- sum(lewisii_data$Site == "GB10")
 GB21_num_plants<- sum(lewisii_data$Site == "GB21")
 GB22_num_plants<- sum(lewisii_data$Site == "GB22")
 GB17_num_plants<- sum(lewisii_data$Site == "GB17")
-CM05_num_plants<- sum(lewisii_data$Site == "CM05")
-CM04_num_plants<- sum(lewisii_data$Site == "CM04")
-CM02_num_plants<- sum(lewisii_data$Site == "CM02")
-EA09_num_plants<- sum(lewisii_data$Site == "EA09")
-EA06_num_plants<- sum(lewisii_data$Site == "EA06")
-EA02_num_plants<- sum(lewisii_data$Site == "EA02")
 HM08_num_plants<- sum(lewisii_data$Site == "HM08")
 HM16_num_plants<- sum(lewisii_data$Site == "HM16")
 HM15_num_plants<- sum(lewisii_data$Site == "HM15")
@@ -166,20 +148,13 @@ HM18_num_plants<- sum(lewisii_data$Site == "HM18")
 
 #making new dataframe
 
-Sites_2 <- c("HM04", "HM02" ,"HM03" ,"HM05" ,"HM09" ,"HM20" ,"HM21","GB18","GB25","GB26","GB10","GB21",
-             "GB22","GB17","EA09","EA06","EA02","HM08","HM16","HM15","HM34","HM33",
-             "HM31","HM29","HM27","HM36","HM35","HM37","HM13","HM23","HM22","HM10","HM17","HM18")
-
-Number_of_Plants <- c(HM04_num_plants,HM02_num_plants,HM03_num_plants,HM05_num_plants,HM09_num_plants,
-                      HM20_num_plants, HM21_num_plants, GB18_num_plants, GB25_num_plants, GB26_num_plants,
-                      GB10_num_plants, GB21_num_plants, GB22_num_plants, GB17_num_plants, EA09_num_plants, 
-                      EA06_num_plants, EA02_num_plants, HM08_num_plants, HM16_num_plants, HM15_num_plants, 
-                      HM34_num_plants, HM33_num_plants, HM31_num_plants, HM29_num_plants, HM27_num_plants,
-                      HM36_num_plants, HM35_num_plants, HM37_num_plants, HM13_num_plants, HM23_num_plants, 
-                      HM22_num_plants, HM10_num_plants,HM17_num_plants, HM18_num_plants)
+Sites_2 <- c("HM04", "HM02" ,"HM03" ,"HM05" ,"HM09" ,"HM20" ,"HM21","GB18","GB25","GB26","GB10","GB21", "GB22","GB17","HM08","HM16","HM15","HM34","HM33","HM31","HM29","HM27","HM36","HM35","HM37","HM13","HM23","HM22","HM10","HM17","HM18")
 
 
-density_old <- data.frame(Sites_2, Number_of_Plants, timezones,forelands)
+Number_of_Plants <- c(HM04_num_plants,HM02_num_plants,HM03_num_plants,HM05_num_plants,HM09_num_plants,HM20_num_plants, HM21_num_plants, GB18_num_plants, GB25_num_plants, GB26_num_plants,GB10_num_plants, GB21_num_plants, GB22_num_plants, GB17_num_plants, HM08_num_plants, HM16_num_plants, HM15_num_plants, HM34_num_plants, HM33_num_plants, HM31_num_plants, HM29_num_plants, HM27_num_plants,HM36_num_plants, HM35_num_plants, HM37_num_plants, HM13_num_plants, HM23_num_plants, HM22_num_plants, HM10_num_plants,HM17_num_plants, HM18_num_plants)
+
+
+density_old <- data.frame(Sites_2, Number_of_Plants, timezones)
 
 
 ##################################Scatterplots + New Dataframes##################################################
@@ -368,8 +343,12 @@ timezone_density <- glmer(Stem_Count ~ Zone + (1|Site), data=lewisii_data, famil
 
 
 #make 1912 part of 1910 for easton 
-#split non-flowering into adults and recruits - add proportion of seedlings as new variable? 
+#split non-flowering into adults and recruits - add proportion of seedlings as new variable? *****
 #filter out easton
+#think about using spatial analysis packages
+#focus on using distance rather than time zone
+#see if there is enough power to calculate different slopes once easton is out
+#LR test or AIC values (which is lower) to see if slope and intercept is a better fit or just intercept
 
 
                                     
