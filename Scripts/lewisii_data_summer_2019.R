@@ -153,26 +153,69 @@ Sites_2 <- c("HM04", "HM02" ,"HM03" ,"HM05" ,"HM09" ,"HM20" ,"HM21","GB18","GB25
 
 Number_of_Plants <- c(HM04_num_plants,HM02_num_plants,HM03_num_plants,HM05_num_plants,HM09_num_plants,HM20_num_plants, HM21_num_plants, GB18_num_plants, GB25_num_plants, GB26_num_plants,GB10_num_plants, GB21_num_plants, GB22_num_plants, GB17_num_plants, HM08_num_plants, HM16_num_plants, HM15_num_plants, HM34_num_plants, HM33_num_plants, HM31_num_plants, HM29_num_plants, HM27_num_plants,HM36_num_plants, HM35_num_plants, HM37_num_plants, HM13_num_plants, HM23_num_plants, HM22_num_plants, HM10_num_plants,HM17_num_plants, HM18_num_plants)
 
+Foreland_Code <- lewisii_data$Foreland_Code
 
 density_old <- data.frame(Sites_2, Number_of_Plants, timezones)
 
+#create new column with counts of seedlings at each site
+
+seedling_dataframe <- lewisii_data %>% select(Site, Stem_Count) %>%
+  group_by(Site) %>%
+  mutate(seedling_count = sum(Stem_Count == 0)) %>%
+  select(-Stem_Count) %>%
+  unique()
+number_of_seedlings <- seedling_dataframe$seedling_count
+ 
+ 
 
 ##################################Scatterplots + New Dataframes##################################################
 
 
+##################################stem count and timezone#####################################
+
+avg_stemcount <- lewisii_data %>% select(Site, Stem_Count,Foreland_Code, elev) %>%
+  group_by(Site) %>%
+  mutate(SC_new = mean(Stem_Count)) %>%
+  select(-Stem_Count) %>%
+  unique()
+avg_stemcount$timezone <- timezones
+avg_stemcount$numerical_timezones <- timezones_numerical
+avg_stemcount$number_of_seedlings <- number_of_seedlings
+
+Foreland_Code <- avg_stemcount$Foreland_Code
+
+
+###Scatterplot for timezone and stem count
+stemcount_timezone_scatter <-
+  ggplot(avg_stemcount, aes(x = numerical_timezones, y = SC_new, fill=Foreland_Code)) +
+  geom_point() + geom_smooth(method = "lm") + labs(x = "Time Zone", y =
+  "Average Stem Count", title = "Stem Count vs. Time Zone")
+
+###Box plot for timezone and stem count
+stemcount_timezone_boxplot <-  ggplot(avg_stemcount, aes(x=timezone, y=SC_new,fill=Foreland_Code)) + 
+  geom_boxplot()+labs(x="Time Zone",y= "Average Stem Count", title="Stem Count vs. Time Zone") +scale_x_discrete(limits=c("Less than LIAM", "1910","1912","1928","1949","1977","2003"))
+  
+#linear model for timezone and stem count
+model_stemcount_timezone <- lmer(SC_new ~ timezone + (1|Foreland_Code)+ (1|), data=avg_stemcount )
+summary(model_stemcount_timezone)
+anova(model_stemcount_timezone)
+
+testmodel_stemcount_timezone <- visreg(model_stemcount_timezone, "Foreland_Code", type="contrast")
 
 ################################density and timezone##########################################
 density_df <- density_old 
 density_df$Foreland_Code <- avg_stemcount$Foreland_Code
 density_df$numerical_timezones <- timezones_numerical
 density_df$distance_from_2016 <- distance_from_2016
+density_df$Foreland_Code <- Foreland_Code
+density_df$elev <- Elevation
 
 library(ggplot2)
 
 ###Scatter plot for timezone and density 
 
 density_timezone_scatter <- ggplot(density_df, aes(x = numerical_timezones, y = Number_of_Plants, fill=Foreland_Code)) +
-geom_point()+geom_smooth(method = "lm")+ labs(x="Time Zone", y="Density", title="Density vs. Time Zone")
+  geom_point()+geom_smooth(method = "lm")+ labs(x="Time Zone", y="Density", title="Density vs. Time Zone")
 
 ###Boxplot for timezone and density 
 density_timezone_boxplot <-  ggplot(density_df, aes(x=timezones, y=Number_of_Plants,fill=Foreland_Code)) + 
@@ -189,8 +232,6 @@ install.packages("lmerTest")
 library(lmerTest)
 
 #can add degree of freedom ddf="Kenward-Roger"
-#write as lmerTest::anova()
-#lmerTest::anova() doesn't work with new cran update?
 
 #########visreg for density and timezone###
 install.packages("visreg")
@@ -203,46 +244,20 @@ testmodel <- visreg(model, xvar="",by= "",cond="",overlay="")
 visreg(fit, "Wind", type="contrast")
 
 
-##################################stem count and timezone#####################################
-
-avg_stemcount <- lewisii_data %>% select(Site, Stem_Count,Foreland_Code) %>%
-  group_by(Site) %>%
-  mutate(SC_new = mean(Stem_Count)) %>%
-  select(-Stem_Count) %>%
-  unique()
-avg_stemcount$timezone <- timezones
-avg_stemcount$numerical_timezones <- timezones_numerical
-
-###Scatterplot for timezone and stem count
-stemcount_timezone_scatter <-
-  ggplot(avg_stemcount, aes(x = numerical_timezones, y = SC_new, fill=Foreland_Code)) +
-  geom_point() + geom_smooth(method = "lm") + labs(x = "Time Zone", y =
-  "Average Stem Count", title = "Stem Count vs. Time Zone")
-
-###Box plot for timezone and stem count
-stemcount_timezone_boxplot <-  ggplot(avg_stemcount, aes(x=timezone, y=SC_new,fill=Foreland_Code)) + 
-  geom_boxplot()+labs(x="Time Zone",y= "Average Stem Count", title="Stem Count vs. Time Zone") +scale_x_discrete(limits=c("Less than LIAM", "1910","1912","1928","1949","1977","2003"))
-  
-#linear model for timezone and stem count
-model_stemcount_timezone <- lmer(SC_new ~ timezone + (1|Foreland_Code), data=avg_stemcount )
-summary(model_stemcount_timezone)
-anova(model_stemcount_timezone)
-
-testmodel_stemcount_timezone <- visreg(model_stemcount_timezone, "Foreland_Code", type="contrast")
-
 
 ################prop. flowering and timezone###################################################
 
 #making column with yes/no as 0/1 for flowering
 lewisii_data$flowering_numerical <- ifelse(lewisii_data$Flowering=='Y', 1,0)
 
-prop_flowering <- lewisii_data %>% select(Site,flowering_numerical,Foreland_Code) %>% 
+prop_flowering <- lewisii_data %>% select(Site,flowering_numerical,Foreland_Code, elev) %>% 
   group_by(Site) %>% 
   mutate(prop_f_site = mean(flowering_numerical)) %>% 
   select(-flowering_numerical) %>% 
   unique() 
 prop_flowering$timezone <- timezones
 prop_flowering$numerical_timezones <- timezones_numerical
+prop_flowering$number_of_seedlings <- number_of_seedlings
 
 
 #####Scatter plot with time zone and prop flowering
@@ -266,6 +281,7 @@ testmodel_flowering_timezone <- visreg(model_flowering_timezone)
 ##################################################Density and Distance from 2016######################################
 
 density_df$distance_from_2016 <- distance_from_2016
+density_df$Foreland_Code <- Foreland_Code
 
 ###scatterplot for density and distance
 density_distance_scatter <- ggplot(density_df, aes(x = distance_from_2016, y = Number_of_Plants, fill=Foreland_Code)) +
@@ -273,8 +289,9 @@ geom_point()+geom_smooth(method = "lm")+ labs(x="Distance from 2016 Line (m)", y
 
 ###model for density and distance
 
-model_density_distance <- lmer(Number_of_Plants ~ distance_from_2016 + (1|Foreland_Code), data=density_df )
+model_density_distance <- lmer(Number_of_Plants ~ distance_from_2016+ elev + (1|Foreland_Code), data=density_df )
 summary(model_density_distance)
+anova(model_density_distance)
 
 testmodel_density_distance <- visreg(model_density_distance)
 
@@ -291,14 +308,15 @@ stemcount_distance_scatter <-
 
 ###model for stem count and distance
 
-model_stemcount_distance <- lmer(SC_new ~ distance_from_2016 + (1|Foreland_Code), data=avg_stemcount )
+model_stemcount_distance <- lmer(SC_new ~ distance_from_2016 + (1|Foreland_Code) + elev+ (1|number_of_seedlings),data=avg_stemcount)
+
 summary(model_stemcount_distance)
 anova(model_stemcount_distance)
 
 testmodel_stemcount_distance <- visreg(model_stemcount_distance)
 
 
-#########################################Proportion Flowering and Distance from 2016###############
+#########################################Proportion Flowering and Distance from 2016##############
 
 prop_flowering$distance_from_2016 <- distance_from_2016
 
@@ -308,31 +326,14 @@ flowering_timezone_scatter <- ggplot(prop_flowering, aes(x = distance_from_2016,
 
 ###model for flowering and distance
 
-model_flowering_distance <- lmer(prop_f_site ~ distance_from_2016 + (1|Foreland_Code), data=prop_flowering )
+model_flowering_distance <- lmer(prop_f_site ~ distance_from_2016 + elev + (1|Foreland_Code) +(1|number_of_seedlings), data=prop_flowering)
 summary(model_flowering_distance)
 anova(model_flowering_distance)
 
 testmodel_flowering_distance <- visreg(model_flowering_distance)
 
 
-
-
-
-
 ##########notes ect#####################
-
-#same code to do ANOVA w/linear model
-m <-lm(formula = SC_new ~ timezone, data = avg_stemcount_df)
-summary(model_stemcount)
-#add site as random factor lmer
-#use visreg or ggeffects to visualize model
-
-#do correlation with site as a random factor
-# random effects
-# random intercept +(1|Site) (works for continuous or categorical predictor)
-# random slope + intercept +(timezones|Site) (if timezone continuous)
-# function = lmer
-
                             
 
 timezone_stemcount <- glmer(Stem_Count ~ Zone + (1|Site), data=lewisii_data, family=poisson(
@@ -342,12 +343,7 @@ timezone_density <- glmer(Stem_Count ~ Zone + (1|Site), data=lewisii_data, famil
   link = log))
 
 
-#make 1912 part of 1910 for easton 
-#split non-flowering into adults and recruits - add proportion of seedlings as new variable? *****
-#filter out easton
 #think about using spatial analysis packages
-#focus on using distance rather than time zone
-#see if there is enough power to calculate different slopes once easton is out
 #LR test or AIC values (which is lower) to see if slope and intercept is a better fit or just intercept
 
 
