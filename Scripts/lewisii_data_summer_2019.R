@@ -176,7 +176,6 @@ number_of_seedlings <- seedling_dataframe$seedling_count
 
 
 ##################################stem count and timezone#####################################
-
 avg_stemcount <- lewisii_data %>% select(Site, Stem_Count,Foreland_Code, elev) %>%
   group_by(Site) %>%
   mutate(SC_new = mean(Stem_Count)) %>%
@@ -185,20 +184,6 @@ avg_stemcount <- lewisii_data %>% select(Site, Stem_Count,Foreland_Code, elev) %
 avg_stemcount$timezone <- timezones
 avg_stemcount$numerical_timezones <- timezones_numerical
 avg_stemcount$number_of_seedlings <- number_of_seedlings
-
-#make different dataframe with no 0 count (seedlings) in Stem Count column
-
-avg_stemcount_ns <- df_no_seedlings %>% select(Site, Stem_Count,Foreland_Code, elev) %>%
-  group_by(Site) %>%
-  mutate(SC_ns = mean(Stem_Count)) %>%
-  select(-Stem_Count) %>%
-  unique()
-avg_stemcount_ns$timezone <- timezones
-avg_stemcount_ns$numerical_timezones <- timezones_numerical
-avg_stemcount_ns$number_of_seedlings <- number_of_seedlings
-
-Foreland_Code <- avg_stemcount$Foreland_Code
-
 
 ###Scatterplot for timezone and stem count
 stemcount_timezone_scatter <-
@@ -275,15 +260,6 @@ prop_flowering$timezone <- timezones
 prop_flowering$numerical_timezones <- timezones_numerical
 prop_flowering$number_of_seedlings <- number_of_seedlings
 
-#making dataframe for proportion flowering with seedlings removed
-prop_flowering_ns <- df_no_seedlings %>% select(Site,flowering_numerical,Foreland_Code, elev) %>%
-  group_by(Site) %>%
-  mutate(prop_f_site = mean(flowering_numerical)) %>%
-  select(-flowering_numerical) %>%
-  unique()
-prop_flowering_ns$timezone <- timezones
-prop_flowering_ns$numerical_timezones <- timezones_numerical
-
 
 #####Scatter plot with time zone and prop flowering
 
@@ -323,6 +299,19 @@ testmodel_density_distance <- visreg(model_density_distance)
 
 ############################################Stem Count and Distance from 2016######################
 
+#make different dataframe with no 0 count (seedlings) in Stem Count column
+
+avg_stemcount_ns <- df_no_seedlings %>% select(Site, Stem_Count,Foreland_Code, elev) %>%
+  group_by(Site) %>%
+  mutate(SC_ns = mean(Stem_Count)) %>%
+  select(-Stem_Count) %>%
+  unique()
+avg_stemcount_ns$timezone <- timezones
+avg_stemcount_ns$numerical_timezones <- timezones_numerical
+avg_stemcount_ns$number_of_seedlings <- number_of_seedlings
+
+Foreland_Code <- avg_stemcount$Foreland_Code
+
 avg_stemcount$distance_from_2016 <- distance_from_2016
 
 ###scatterplot for stem count and distance
@@ -350,6 +339,15 @@ model_stemcount_distance_ns <- visreg(model_stemcount_distance_ns)
 
 
 #########################################Proportion Flowering and Distance from 2016##############
+
+#making dataframe for proportion flowering with seedlings removed
+prop_flowering_ns <- df_no_seedlings %>% select(Site,flowering_numerical,Foreland_Code, elev) %>%
+  group_by(Site) %>%
+  mutate(prop_f_site = mean(flowering_numerical)) %>%
+  select(-flowering_numerical) %>%
+  unique()
+prop_flowering_ns$timezone <- timezones
+prop_flowering_ns$numerical_timezones <- timezones_numerical
 
 prop_flowering$distance_from_2016 <- distance_from_2016
 
