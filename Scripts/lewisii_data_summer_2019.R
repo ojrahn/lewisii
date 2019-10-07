@@ -48,6 +48,10 @@ lewisii_data$Foreland_Code <- gsub("[0,1,2,3,4,5,6,7,8,9]","", lewisii_data$Fore
 timezone_reps <- lewisii_data[!duplicated(lewisii_data$Site), ]
 #make column just for distance from 2016 line
 distance_from_2016 <- timezone_reps$dist
+
+#make new dataframe without seedlings 
+
+df_no_seedlings <- filter(lewisii_data, Stem_Count > 0)
   
 
 #########################correlation between time zone + elevation############################
@@ -182,6 +186,17 @@ avg_stemcount$timezone <- timezones
 avg_stemcount$numerical_timezones <- timezones_numerical
 avg_stemcount$number_of_seedlings <- number_of_seedlings
 
+#make different dataframe with no 0 count (seedlings) in Stem Count column
+
+avg_stemcount_ns <- df_no_seedlings %>% select(Site, Stem_Count,Foreland_Code, elev) %>%
+  group_by(Site) %>%
+  mutate(SC_ns = mean(Stem_Count)) %>%
+  select(-Stem_Count) %>%
+  unique()
+avg_stemcount_ns$timezone <- timezones
+avg_stemcount_ns$numerical_timezones <- timezones_numerical
+avg_stemcount_ns$number_of_seedlings <- number_of_seedlings
+
 Foreland_Code <- avg_stemcount$Foreland_Code
 
 
@@ -250,6 +265,7 @@ visreg(fit, "Wind", type="contrast")
 #making column with yes/no as 0/1 for flowering
 lewisii_data$flowering_numerical <- ifelse(lewisii_data$Flowering=='Y', 1,0)
 
+#making dataframe for prop flowering
 prop_flowering <- lewisii_data %>% select(Site,flowering_numerical,Foreland_Code, elev) %>% 
   group_by(Site) %>% 
   mutate(prop_f_site = mean(flowering_numerical)) %>% 
@@ -258,6 +274,15 @@ prop_flowering <- lewisii_data %>% select(Site,flowering_numerical,Foreland_Code
 prop_flowering$timezone <- timezones
 prop_flowering$numerical_timezones <- timezones_numerical
 prop_flowering$number_of_seedlings <- number_of_seedlings
+
+#making dataframe for proportion flowering with seedlings removed
+prop_flowering_ns <- df_no_seedlings %>% select(Site,flowering_numerical,Foreland_Code, elev) %>%
+  group_by(Site) %>%
+  mutate(prop_f_site = mean(flowering_numerical)) %>%
+  select(-flowering_numerical) %>%
+  unique()
+prop_flowering_ns$timezone <- timezones
+prop_flowering_ns$numerical_timezones <- timezones_numerical
 
 
 #####Scatter plot with time zone and prop flowering
@@ -315,6 +340,14 @@ anova(model_stemcount_distance)
 
 testmodel_stemcount_distance <- visreg(model_stemcount_distance)
 
+#model for stem count and distance with no seedlings
+avg_stemcount_ns$distance_from_2016 <- distance_from_2016
+
+model_stemcount_distance_ns <- lmer(SC_ns ~ distance_from_2016 + elev+ (1|Foreland_Code) ,data=avg_stemcount_ns)
+summary(model_stemcount_distance_ns)
+anova(model_stemcount_distance_ns)
+model_stemcount_distance_ns <- visreg(model_stemcount_distance_ns)
+
 
 #########################################Proportion Flowering and Distance from 2016##############
 
@@ -331,6 +364,12 @@ summary(model_flowering_distance)
 anova(model_flowering_distance)
 
 testmodel_flowering_distance <- visreg(model_flowering_distance)
+
+###model for flowering and distance without seedlings
+
+model_flowering_distance_ns <- lmer(prop_f_site ~ distance_from_2016 + elev + (1|Foreland_Code), data=prop_flowering_ns)
+summary(model_flowering_distance)
+anova(model_flowering_distance)
 
 
 ##########notes ect#####################
