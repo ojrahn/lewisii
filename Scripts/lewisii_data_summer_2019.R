@@ -9,7 +9,7 @@ install.packages("dplyr")
 
 #new columns ect + creating columns for time zones and forelands
 
-lewisii_data <- read.csv("./data/Density_StageStructure_Data_Lewisii.csv")
+lewisii_data <- read.csv("./data/01_Density_StageStructure_Data_Lewisii.csv")
 
 lewisii_data$stemcount <- as.numeric(lewisii_data$Stem_Count) 
 lewisii_data$elev <- as.numeric(lewisii_data$Elevation)
