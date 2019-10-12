@@ -1,0 +1,45 @@
+survey_date,sampling_1,sampling_2,Trip,Site,Waypoints,Lat,Long,Elevation,Aspect,Slope,Notes
+13/07/19,,,Helm_1,HM_CF_1928,HM03,49.968,123.01762,1722,290,1,Cinder flats just above 1928
+14/07/19,,,Helm_1,HM_CF_1928,HM02,49.96796,123.01742,1694,304,1,Cinder flats just above 1928
+14/07/19,,,Helm_1,HM_CF_1928,HM04,49.9677,123.01769,1727,286,2,Cinder flats just above 1928
+15/07/19,,,Helm_1,HM_CF_1949,HM05,49.96609,123.01189,1736,312,1,"Cinder flats, at 1949 (spray painted rock)"
+15/07/19,,,Helm_1,HM_PR_1928,HM08,49.96357,123.0111,1743,132,4,"Cinder flats, downstream, continuous lewisii along stream banks, lewisii on slower/quieter side stream and not main branch"
+15/07/19,,,Helm_1,HM_PR_1928,HM16,49.96344,123.01137,1752,52,12,"Cinder flats, downstream, continuous lewisii along stream banks, lewisii on slower/quieter side stream and not main branch"
+15/07/19,,,Helm_1,HM_PR_1928,HM15,49.96333,123.01187,1761,70,12,"Cinder flats, downstream, continuous lewisii along stream banks, lewisii on slower/quieter side stream and not main branch"
+,,,Helm_1,HM_CF_core,HM17,N49° 58.180',W123° 01.258',1731,,,"Cinder flats, downstream of 1928 but before the Helm Glacier Route, around Helm Lake"
+,,,Helm_1,HM_CF_core,HM18,N49° 58.284',W123° 01.104',1735,,,"Cinder flats, downstream of 1928 but before the Helm Glacier Route, middle of CInder Flats, no obvious water source"
+,,,Helm_1,HM_CF_core,HM19,N49° 58.324',W123° 01.135',1736,,,"Cinder flats, downstream of 1928 but before the Helm Glacier Route, middle of CInder Flats, no obvious water source"
+16/07/19,,,Helm_1,HM_GR_core,HM09,49.98403,123.00556,1657,348,5,"Helm Glacier route, downstream of fork in stream and HM20 and HM21, downstream 1928"
+16/07/19,,,Helm_1,HM_GR_core,HM20,49.98238,123.00509,1676,324,3,"Helm Glacier route, right fork in stream, downstream 1928, diverse and productive site, typical stream setting"
+16/07/19,,,Helm_1,HM_GR_core,HM21,49.98225,123.00589,1679,348,4,"Helm Glacier route, left fork in stream, stream bed was dry, plants were located in the middle of stream bed, low density, downstream 1928, anomoulous"
+,,,Helm_1,HM_GR_1928,HM10,N49° 58.794', W123° 00.292',1696,,,"Helm Glacier Route, just within 1928 where the trail crosses the river, dense lewisii"
+,,,Helm_1,HM_GR_1928,HM22,N49° 58.731',W123° 00.231',1702,,,"Helm Glacier route, above 1928, in the flat valley bottom with narrow stream, moss and muddy banks, lewisii just beyond moss (dense) and over a metre from stream bank on bottom slopes of the moraine"
+,,,Helm_1,HM_GR_1928,HM23,N49° 58.602',W123° 00.169',1700,,,"Helm Glacier route, above 1928, leaving valley bottom, stream flows down slope, lewisii found alond small side stream/seep, snow covering above this point so could not explore further, potentially a good end point for above 1928 site (thrid transect) "
+,,,Helm_1,HM_GR_1928-49,HM13,N49° 58.493',W123° 00.064',1783,,,"Helm Glacier Route, inbetween 1928 -1949 closer to 1949, have not surveyed yet but there are three parallel small streams with lewisii growing on them that we want to sample, perhaps at the same elevation, perhaps at slightly different elevations"
+23/07/19,,,Garibaldi_1,GB_LIA,GB10,49.80902,122.98592,1282,160,3,
+23/07/19,,,Garibaldi_1,GB_1928,GB21,49.8209,122.98417,1418,187,9,
+24/07/19,,,Garibaldi_1,GB_LIA,GB22,49.80959,122.98585,1273,205,6,
+24/07/19,,,Garibaldi_1,GB_LIA,GB17,49.81122,122.98545,1285,204,4,
+24/07/19,,,Garibaldi_1,GB_1928,GB18,49.81459,122.98359,1341,210,3,
+25/07/19,,,Garibaldi_1,GB_CORE_2,GB25,49.79679,122.98914,1367,84,5,
+25/07/19,,,Garibaldi_1,GB_CORE_1,GB26,49.7982,122.98851,1366,98,10,
+30/07/19,,,Coleman_1,,CM05,48.79863,121.86724,1418,336,20,meristems missing on multiple plants- herbivory
+30/07/19,,,Coleman_1,,CM04,48.79959,121.86568,1406,328,9,most seedlings are yellow/appear nitrogen deficient or stressed
+30/07/19,,,Coleman_1,,CM02,48.79799,121.86536,1446,352,15,most plants are dried out and unhealthy looking. herbivory is evident on multiple adult flowering plants
+07/08/19,,,Easton_1,EA_WEST_LIA,EA09,48.72498,121.83601,1410,113,23,
+07/08/19,,,Easton_1,EA_WEST_LIA,EA06,48.72363,121.83514,1406,132,7,
+07/08/19,,,Easton_1,EA_WEST_LIA,EA02,48.7216,121.83403,1358,142,8,"site is very close to a large and fast river, lots of boulders and sandy soil, very direct sunlight"
+27/08/19,,,Helm_2,HM_GR_1977,HM29,49.97066,122.99675,1783,255,0,
+27/08/19,,,Helm_2,HM_GR_1977,HM27 ,49.97189,122.9977,1783,142,5,
+27/08/19,,,Helm_2,HM_GR_1949,HM36,49.97033,123.00067,1750,244,-1,
+28/08/19,,,Helm_2,HM_GR_1949,HM35,49.96902,123.00128,1740,116,4,
+28/08/19,,,Helm_2,HM_GR_1977,HM37,49.97075,122.99953,1757,242,14,
+28/08/19,,,Helm_2,HM_GR_1928,HM13,49.97472,123.00105,1776,350,9,near 1949
+27/08/19,,,Helm_2,HM_GR_2003,HM34,49.96955,122.9931,1781,240,14,
+27/08/19,,,Helm_2,HM_GR_2003,HM33,49.96977,122.99342,1784,207,11,
+27/08/19,,,Helm_2,HM_GR_2003,HM31,49.97024,122.99518,1781,288,0,
+28/08/19,,,Helm_2,HM_GR_1928,HM23,49.97661,123.00284,1704,352,11,
+28/08/19,,,Helm_2,HM_GR_1928,HM22,49.97837,123.00375,1688,354,1,
+28/08/19,,,Helm_2,HM_GR_1928,HM10 ,49.97936,123.00426,1697,338,-1,
+29/08/19,,,Helm_2,HM_CF_core,HM17,49.9696,123.02059,1720,314,0,
+29/08/19,,,Helm_2,HM_CF_core,HM18,49.97144,123.01847,1728,324,-1,
