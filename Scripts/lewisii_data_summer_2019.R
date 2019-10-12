@@ -196,7 +196,7 @@ stemcount_timezone_boxplot <-  ggplot(avg_stemcount, aes(x=timezone, y=SC_new,fi
   geom_boxplot()+labs(x="Time Zone",y= "Average Stem Count", title="Stem Count vs. Time Zone") +scale_x_discrete(limits=c("Less than LIAM", "1910","1912","1928","1949","1977","2003"))
   
 #linear model for timezone and stem count
-model_stemcount_timezone <- lmer(SC_new ~ timezone + (1|Foreland_Code)+ (1|), data=avg_stemcount )
+model_stemcount_timezone <- lmer(SC_new ~ timezone + (1|Foreland_Code), data=avg_stemcount)
 summary(model_stemcount_timezone)
 anova(model_stemcount_timezone)
 
@@ -322,7 +322,8 @@ stemcount_distance_scatter <-
 
 ###model for stem count and distance
 
-model_stemcount_distance <- lmer(SC_new ~ distance_from_2016 + (1|Foreland_Code) + elev+ (1|number_of_seedlings),data=avg_stemcount)
+model_stemcount_distance <- lmer(SC_ns ~ distance_from_2016 + (1|Foreland_Code) + elev,data=avg_stemcount_ns)
+#want another model with seedling # as response variable
 
 summary(model_stemcount_distance)
 anova(model_stemcount_distance)
@@ -357,7 +358,7 @@ flowering_timezone_scatter <- ggplot(prop_flowering, aes(x = distance_from_2016,
 
 ###model for flowering and distance
 
-model_flowering_distance <- lmer(prop_f_site ~ distance_from_2016 + elev + (1|Foreland_Code) +(1|number_of_seedlings), data=prop_flowering)
+model_flowering_distance <- lmer(prop_f_site ~ distance_from_2016 * elev + (1|Foreland_Code), data=prop_flowering)
 summary(model_flowering_distance)
 anova(model_flowering_distance)
 
@@ -368,7 +369,7 @@ testmodel_flowering_distance <- visreg(model_flowering_distance)
 model_flowering_distance_ns <- lmer(prop_f_site ~ distance_from_2016 + elev + (1|Foreland_Code), data=prop_flowering_ns)
 summary(model_flowering_distance)
 anova(model_flowering_distance)
-
+testmodel_flowering_distance_ns <- visreg(model_flowering_distance)
 
 ##########notes ect#####################
                             
@@ -383,5 +384,11 @@ timezone_density <- glmer(Stem_Count ~ Zone + (1|Site), data=lewisii_data, famil
 #think about using spatial analysis packages
 #LR test or AIC values (which is lower) to see if slope and intercept is a better fit or just intercept
 
+#change interactions in model (*)
+#scale variables (probably just predictors)
+#+ centre = true
+#look at model diagnostics
 
-                                    
+#put anova tables into a csv
+
+
