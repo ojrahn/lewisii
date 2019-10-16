@@ -299,11 +299,19 @@ summary(model_density_distance)
 anova(model_density_distance)
 model_density_distance
 
-vis_density_distance <- visreg(model_density_distance,
-                                     main="Population Density vs. Distance from 2016 Glacial Terminus"
-                                     ,ylab="Predicted Density",
-                                     xlab="Distance from 2016 Terminus")
+vis_density_distance <- visreg(model_density_distance, 
+                                 main="Predicted Population Density vs. Distance from 2016 Glacial
+                                 Terminus",
+                                 ylab="Predicted Population Density",
+                                 xlab="Distance from 2016 Terminus",
+                                 gg=TRUE,
+                                 line.par=list(col='orange'),
+                                 points.par=list(col='red',cex=1, pch=1))
 
+###model diagnostics 
+install.packages("stargazer")
+library(stargazer)
+diagnostics_density <- stargazer(model_density_distance,type="text")
 
 ############################################Stem Count and Distance from 2016######################
 
@@ -339,7 +347,14 @@ model_stemcount_distance <- lmer(SC_ns ~ distance_scaled* elev_scaled + (1|Forel
 summary(model_stemcount_distance)
 anova(model_stemcount_distance)
 
-vis_stemcount_distance <- visreg(model_stemcount_distance, main="Average Stemcount vs. Distance from 2016 Glacial Terminus", ylab="Predicted Stemcount", xlab="Distance from 2016 Terminus")
+vis_stemcount_distance <- visreg(model_stemcount_distance, 
+                                 main="Predicted Average Stem Count vs. Distance from 2016 Glacial
+                                 Terminus",
+                                 ylab="Predicted Average Stem Count",
+                                 xlab="Distance from 2016 Terminus",
+                                 gg=TRUE,
+                                 line.par=list(col='orange'),
+                                 points.par=list(col='red',cex=1, pch=1))
 
 
 #########################################Proportion Flowering and Distance from 2016##############
@@ -370,14 +385,17 @@ model_flowering_distance <- lmer(prop_f_site ~ distance_scaled * elev_scaled + (
 summary(model_flowering_distance)
 anova(model_flowering_distance)
 
-vis_flowering_distance <- visreg(model_flowering_distance,
-                                       main="Number of Flowering Plants vs. Distance from 2016 Glacial Terminus"
-                                       ,ylab="Predicted Number of Flowering Plants",
-                                       xlab="Distance from 2016 Terminus",
-                                       line=list(col="green"))
+vis_flowering_distance <- visreg(model_flowering_distance, 
+                                 main="Predicted Proportion of Flowering Plants vs. Distance from 2016 Glacial
+                                      Terminus",
+                                 ylab="Predicted Proportion of Flowering Plants",
+                                 xlab="Distance from 2016 Terminus",
+                                 gg=TRUE,
+                                 line.par=list(col='orange'),
+                                 points.par=list(col='red',cex=1, pch=1))
 
 
-############################Making new response variable for number of seedlings####################
+############################Seedlings and Distance from 2016###########################
 library(ggplot2)
 
 #scale variables
@@ -389,8 +407,7 @@ model_seedlings_distance <- lmer(number_of_seedlings ~ distance_scaled * elev_sc
 summary(model_seedlings_distance)
 anova(model_seedlings_distance)
 vis_seedlings_distance <- visreg(model_seedlings_distance, 
-                                      main="Predicted Number of Seedlings vs. Distance from 2016 Glacial
-                                      Terminus",
+                                      main="Predicted Number of Seedlings vs. Distance from 2016                                          Glacial Terminus",
                                       ylab="Predicted Number of Seedlings",
                                       xlab="Distance from 2016 Terminus",
                                       gg=TRUE,
