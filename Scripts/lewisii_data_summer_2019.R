@@ -175,7 +175,7 @@ number_of_seedlings <- seedling_dataframe$seedling_count
 
 
 ##################################stem count and timezone#####################################
-avg_stemcount <- lewisii_data %>% select(Site, Stem_Count,Foreland_Code, elev) %>%
+avg_stemcount <- lewisii_data %>% select(Site,Stem_Count,Foreland_Code, elev,Distance_from_Glacial_Terminus_.m.) %>%
   group_by(Site) %>%
   mutate(SC_new = mean(Stem_Count)) %>%
   select(-Stem_Count) %>%
@@ -207,6 +207,7 @@ density_df$Foreland_Code <- avg_stemcount$Foreland_Code
 density_df$numerical_timezones <- timezones_numerical
 density_df$distance_from_2016 <- distance_from_2016
 
+density_df$Foreland_Code <- Foreland_Code
 
 library(ggplot2)
 
@@ -274,9 +275,7 @@ testmodel_flowering_timezone <- visreg(model_flowering_timezone)
 
 ##################################################Density and Distance from 2016######################################
 
-#adding columns
-density_df$distance_from_2016 <- distance_from_2016
-density_df$Foreland_Code <- Foreland_Code
+density_df2 <- merge(density_df,lewisii_data, by.x = 2, by.y = 0, all.x = TRUE)
 
 ###scatterplot for density and distance
 density_distance_scatter <- ggplot(density_df, aes(x = distance_from_2016, y = Number_of_Plants, fill=Foreland_Code)) +
@@ -286,26 +285,27 @@ geom_point()+geom_smooth(method = "lm")+ labs(x="Distance from 2016 Line (m)", y
 install.packages("standardize")
 library(standardize)
 
-#standardizing predictor variables
-density_df$distance_scaled <- scale(density_df$distance_from_2016, center=TRUE)[,1]
-density_df$elev_scaled <- scale(density_df$elev, center=TRUE)[,1]
+#standardizing predictor variables - don't need this
+#density_df$distance_scaled <- scale(density_df$distance_from_2016, center=TRUE)[,1]
+#density_df$elev_scaled <- scale(density_df$elev, center=TRUE)[,1]
 
 #making model
-model_density_distance <- lmer(Number_of_Plants ~ distance_scaled * elev_scaled + (1|Foreland_Code), data=density_df)
-
+model_density_distance <- lmer(Number_of_Plants ~ distance_from_2016 + (1|Foreland_Code.x), data=density_df2)
 
 summary(model_density_distance)
 anova(model_density_distance)
 model_density_distance
 
-vis_density_distance <- visreg(model_density_distance, 
-                                 main="Predicted Population Density vs. Distance from                                   2016 Glacial
-                                 Terminus",
-                                 ylab="Predicted Population Density",
-                                 xlab="Distance from 2016 Terminus",
-                                 gg=TRUE,
-                                 line.par=list(col='orange'),
-                                 points.par=list(col='red',cex=1, pch=1))
+vis_density_distance <- visreg(
+  model_density_distance,
+  main = "Predicted Population Density vs. Distance from 2016 Glacial
+  Terminus",
+  ylab = "Predicted Population Density",
+  xlab = "Distance from 2016 Terminus",
+  gg = TRUE,
+  line.par = list(col = 'orange'),
+  points.par = list(col = 'red', cex = 1, pch =
+                      1))
 
 ###model diagnostics 
 # need to detach lmerTest
@@ -318,7 +318,7 @@ diagnostics_density <- stargazer(model_density_distance)
 
 #make different dataframe with no 0 count (seedlings) in Stem Count column
 
-avg_stemcount_ns <- df_no_seedlings %>% select(Site, Stem_Count,Foreland_Code, elev) %>%
+avg_stemcount_ns <- df_no_seedlings %>% select(Site, Stem_Count,Foreland_Code, elev,Distance_from_Glacial_Terminus_.m.) %>%
   group_by(Site) %>%
   mutate(SC_ns = mean(Stem_Count)) %>%
   select(-Stem_Count) %>%
@@ -329,7 +329,7 @@ avg_stemcount_ns$number_of_seedlings <- number_of_seedlings
 
 Foreland_Code <- avg_stemcount$Foreland_Code
 
-avg_stemcount$distance_from_2016 <- distance_from_2016
+avg_stemcount_ns$distance_from_2016 <- avg_stemcount_ns$Distance_from_Glacial_Terminus_.m.
 
 ###scatterplot for stem count and distance
 stemcount_distance_scatter <-
@@ -337,13 +337,13 @@ stemcount_distance_scatter <-
   geom_point() + geom_smooth(method = "lm") + labs(x = "Distance from 2016 Line (m)", y =
   "Average Stem Count", title = "Stem Count vs. Distance from 2016")
 
-#scaling predictor variables
-avg_stemcount_ns$distance_scaled <- scale(avg_stemcount_ns$distance_from_2016, center=TRUE)[,1]
-avg_stemcount_ns$elev_scaled <- scale(avg_stemcount$elev, center=TRUE)[,1]
+#scaling predictor variables - don't need
+#avg_stemcount_ns$distance_scaled <- scale(avg_stemcount_ns$distance_from_2016, center=TRUE)[,1]
+#avg_stemcount_ns$elev_scaled <- scale(avg_stemcount$elev, center=TRUE)[,1]
 
 ###model for stem count and distance (no seedlings included)
 
-model_stemcount_distance <- lmer(SC_ns ~ distance_scaled* elev_scaled + (1|Foreland_Code),data=avg_stemcount_ns)
+model_stemcount_distance <- lmer(SC_ns ~ distance_from_2016 + (1|Foreland_Code),data=avg_stemcount_ns)
 
 summary(model_stemcount_distance)
 anova(model_stemcount_distance)
@@ -376,13 +376,13 @@ prop_flowering_ns$distance_from_2016 <- prop_flowering_ns$Distance_from_Glacial_
 
 flowering_timezone_scatter <- ggplot(prop_flowering, aes(x = distance_from_2016, y = prop_f_site, fill= Foreland_Code)) + geom_point()+geom_smooth(method="lm")+ labs(x="Distance from 2016 Line (m)", y="Proportion Flowering", title="Proportion Flowering vs. Distance from 2016")
 
-#scaling predictor variables
-prop_flowering_ns$distance_scaled <- scale(prop_flowering_ns$distance_from_2016, center=TRUE)[,1]
-prop_flowering_ns$elev_scaled <- scale(prop_flowering_ns$elev, center=TRUE)[,1]
+#scaling predictor variables- don't need 
+#prop_flowering_ns$distance_scaled <- scale(prop_flowering_ns$distance_from_2016, center=TRUE)[,1]
+#prop_flowering_ns$elev_scaled <- scale(prop_flowering_ns$elev, center=TRUE)[,1]
 
 ###model for flowering and distance (no seedlings)
 
-model_flowering_distance <- lmer(prop_f_site ~ distance_scaled * elev_scaled + (1|Foreland_Code), data=prop_flowering_ns)
+model_flowering_distance <- lmer(prop_f_site ~ distance_from_2016 + (1|Foreland_Code), data=prop_flowering_ns)
 summary(model_flowering_distance)
 anova(model_flowering_distance)
 
@@ -397,8 +397,6 @@ vis_flowering_distance <- visreg(
   xlab = "Distance from 2016 Terminus",
   gg = TRUE,
   line.par = list(col = 'orange'),
-  points.par = list(col = 'red', cex = 1, pch =
-                      1),
   points.par = list(col = 'red', cex = 1, pch =
                       #add call
                       1))
@@ -429,7 +427,7 @@ library(ggplot2)
 prop_flowering$distance_scaled <- scale(prop_flowering$distance_from_2016, center=TRUE)[,1]
 prop_flowering$elev_scaled <- scale(prop_flowering$elev, center=TRUE)[,1]
 
-model_seedlings_distance <- lmer(number_of_seedlings ~ distance_scaled * elev_scaled + (1|Foreland_Code), data=prop_flowering)
+model_seedlings_distance <- lmer(number_of_seedlings ~ distance_from_2016 + (1|Foreland_Code), data=prop_flowering)
 
 summary(model_seedlings_distance)
 anova(model_seedlings_distance)
@@ -444,8 +442,7 @@ vis_seedlings_distance <- visreg(
                       1, pch = 1)
 )
 
-                                      
-
+                                     
 ####################################putting models on one page######################################################
 
 #multiplot function
