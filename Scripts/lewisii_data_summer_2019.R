@@ -206,8 +206,7 @@ density_df <- density_old
 density_df$Foreland_Code <- avg_stemcount$Foreland_Code
 density_df$numerical_timezones <- timezones_numerical
 density_df$distance_from_2016 <- distance_from_2016
-density_df$Foreland_Code <- Foreland_Code
-density_df$elev <- Elevation
+
 
 library(ggplot2)
 
@@ -387,14 +386,40 @@ model_flowering_distance <- lmer(prop_f_site ~ distance_scaled * elev_scaled + (
 summary(model_flowering_distance)
 anova(model_flowering_distance)
 
-vis_flowering_distance <- visreg(model_flowering_distance, 
-                                 main="Predicted Proportion of Flowering Plants vs. Distance from 2016 Glacial
-                                      Terminus",
-                                 ylab="Predicted Proportion of Flowering Plants",
-                                 xlab="Distance from 2016 Terminus",
-                                 gg=TRUE,
-                                 line.par=list(col='orange'),
-                                 points.par=list(col='red',cex=1, pch=1))
+install.packages("viridis")
+library(viridis)
+
+vis_flowering_distance <- visreg(
+  model_flowering_distance,
+  main = "Predicted Proportion of Flowering Plants vs. Distance from 2016 Glacial
+  Terminus",
+  ylab = "Predicted Proportion of Flowering Plants",
+  xlab = "Distance from 2016 Terminus",
+  gg = TRUE,
+  line.par = list(col = 'orange'),
+  points.par = list(col = 'red', cex = 1, pch =
+                      1),
+  points.par = list(col = 'red', cex = 1, pch =
+                      #add call
+                      1))
+
+#visreg output for flowering and distance by foreland (ignore)
+
+vistest <- visreg(
+  model_flowering_distance,
+  "prop_f_site",
+  strip.names = c("Helm", "Garibaldi"),
+  by="Foreland_Code",
+  main = "Predicted Proportion of Flowering Plants vs. Distance from 2016 Glacial
+  Terminus",
+  ylab = "Predicted Proportion of Flowering Plants",
+  xlab = "Distance from 2016 Terminus",
+  gg = TRUE,
+  line.par = list(col = 'orange'),
+  points.par = list(col = 'red', cex =
+                      1, pch = 1)
+)
+
 
 
 ############################Seedlings and Distance from 2016###########################
@@ -408,13 +433,16 @@ model_seedlings_distance <- lmer(number_of_seedlings ~ distance_scaled * elev_sc
 
 summary(model_seedlings_distance)
 anova(model_seedlings_distance)
-vis_seedlings_distance <- visreg(model_seedlings_distance, 
-                                      main="Predicted Number of Seedlings vs. Distance from 2016                                          Glacial Terminus",
-                                      ylab="Predicted Number of Seedlings",
-                                      xlab="Distance from 2016 Terminus",
-                                      gg=TRUE,
-                                      line.par=list(col='orange'),
-                                      points.par=list(col='red',cex=1, pch=1))
+vis_seedlings_distance <- visreg(
+  model_seedlings_distance,
+  main = "Predicted Number of Seedlings vs. Distance from 2016 Glacial Terminus",
+  ylab = "Predicted Number of Seedlings",
+  xlab = "Distance from 2016 Terminus",
+  gg = TRUE,
+  line.par = list(col = 'orange'),
+  points.par = list(col = 'red', cex =
+                      1, pch = 1)
+)
 
                                       
 
