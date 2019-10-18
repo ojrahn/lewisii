@@ -368,6 +368,9 @@ vis_stemcount_distance <- visreg(model_stemcount_distance,
 #model for stemcount from main dataframe
 
 model_stemcount_main <- lmer(Stem_Count ~ Distance_from_Glacial_Terminus_.m. + (1|Foreland_Code/Site),data=df_no_seedlings)
+summary(model_stemcount_main)
+anova(model_stemcount_main)
+
 #visreg
 vis_stemcount_main <- visreg(
   model_stemcount_main,
@@ -381,8 +384,6 @@ vis_stemcount_main <- visreg(
   points.par = list(col =
                       'red', cex = 1, pch = 1)
 )
-
-
 
 
 #########################################Proportion Flowering and Distance from 2016##############
@@ -401,7 +402,7 @@ prop_flowering_ns$distance_from_2016 <- prop_flowering_ns$Distance_from_Glacial_
 
 ###scatterplot for flowering and distance
 
-flowering_timezone_scatter <- ggplot(prop_flowering, aes(x = distance_from_2016, y = prop_f_site, fill= Foreland_Code)) + geom_point()+geom_smooth(method="lm")+ labs(x="Distance from 2016 Line (m)", y="Proportion Flowering", title="Proportion Flowering vs. Distance from 2016")
+flowering_distance_scatter <- ggplot(prop_flowering, aes(x = distance_from_2016, y = prop_f_site, fill= Foreland_Code)) + geom_point()+geom_smooth(method="lm")+ labs(x="Distance from 2016 Line (m)", y="Proportion Flowering", title="Proportion Flowering vs. Distance from 2016")
 
 #scaling predictor variables- don't need 
 #prop_flowering_ns$distance_scaled <- scale(prop_flowering_ns$distance_from_2016, center=TRUE)[,1]
@@ -417,10 +418,28 @@ modplot_f <- plot(model_flowering_distance)
 #look okay
 
 ###model for flowering and distance from main dataframe (no seedlings)
-###don't actually know which model to use
-model_flowering_main <- glmer(flowering_numerical ~ dist + (1|Foreland_Code), data=df_no_seedlings, family="binomial"(link=log))
+
+#change flowering to factor
+df_no_seedlings$flowering_factor <- as.factor(df_no_seedlings$flowering_numerical)
+
+#scatterplot for whole dataframe
+flowering_main_scatter <- ggplot(df_no_seedlings, aes(x = dist, y = flowering_numerical, fill= Foreland_Code)) + geom_point()+geom_smooth(method="lm")+ labs(x="Distance from 2016 Line (m)", y="Proportion Flowering", title="Proportion Flowering vs. Distance from 2016")
+
+#standardize predictor variable
+library(standardize)
+df_no_seedlings$distance_standardized <- scale(df_no_seedlings$dist)
+
+
+#model
+model_flowering_main <- glmer(flowering_numerical ~ distance_standardized + (1|Foreland_Code),data=df_no_seedlings,family=binomial(link="logit"))
 summary(model_flowering_main)
 anova(model_flowering_main)
+
+install.packages("ggeffects")
+library(ggeffects)
+ggpred_flowering <- ggpredict(model_flowering_main)
+
+
 #residuals
 modplot_main_flowering <- plot(model_flowering_main)
 
@@ -434,7 +453,6 @@ vis_flowering_main <- visreg(
   gg = TRUE,
   line.par = list(col = 'orange'),
   points.par = list(col = 'red', cex = 1, pch =
-                      #add call
                       1))
 
 
@@ -486,12 +504,20 @@ anova(model_seedlings_distance)
 modplot_s <- plot(model_seedlings_distance)
 #looks okay
 
-#from main dataframe
+#make seedlings model with data from main dataframe
 
+#make seedling (0 stem count) a "Y" "N" binary in new column
+lewisii_data$seedling <- ifelse(lewisii_data$Stem_Count=='0', 1,0)
+#scale distance
+#lewisii_data$distance_scaled <- scale(lewisii_data$dist)
 
+#model
+model_seedlings_main <-glmer(seedling ~ dist + (1|Foreland_Code), data=lewisii_data,family=binomial(link="logit"))
+summary(model_seedlings_distance)
+anova(model_seedlings_distance)
 
 vis_seedlings_distance <- visreg(
-  model_seedlings_distance,
+  model_seedlings_main,
   main = "Predicted Number of Seedlings vs. Distance from 2016 Glacial Terminus",
   ylab = "Predicted Number of Seedlings",
   xlab = "Distance from 2016 Terminus",
@@ -501,7 +527,6 @@ vis_seedlings_distance <- visreg(
                       1, pch = 1)
 )
 
-                                     
 ####################################putting models on one page######################################################
 
 #multiplot function
@@ -545,13 +570,6 @@ allmodels <- multiplot(vis_density_distance,vis_flowering_distance,vis_seedlings
                         
 ##########notes ect#####################
                             
-
-timezone_stemcount <- glmer(Stem_Count ~ Zone + (1|Site), data=lewisii_data, family=poisson(
-  link = log))
-
-timezone_density <- glmer(Stem_Count ~ Zone + (1|Site), data=lewisii_data, family=poisson(
-  link = log))
-
 
 #think about using spatial analysis packages
 #LR test or AIC values (which is lower) to see if slope and intercept is a better fit or just intercept
