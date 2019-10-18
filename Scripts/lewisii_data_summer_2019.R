@@ -295,6 +295,10 @@ model_density_distance <- lmer(Number_of_Plants ~ distance_from_2016 + (1|Forela
 summary(model_density_distance)
 anova(model_density_distance)
 model_density_distance
+#residuals
+modplot_d <- plot(model_density_distance)
+#cone shaped? 
+
 
 vis_density_distance <- visreg(
   model_density_distance,
@@ -318,7 +322,7 @@ diagnostics_density <- stargazer(model_density_distance)
 
 #make different dataframe with no 0 count (seedlings) in Stem Count column
 
-avg_stemcount_ns <- df_no_seedlings %>% select(Site, Stem_Count,Foreland_Code, elev,Distance_from_Glacial_Terminus_.m.) %>%
+avg_stemcount_ns <- df_no_seedlings %>% select(Site, Stem_Count,Foreland_Code,elev,Distance_from_Glacial_Terminus_.m.) %>%
   group_by(Site) %>%
   mutate(SC_ns = mean(Stem_Count)) %>%
   select(-Stem_Count) %>%
@@ -347,15 +351,38 @@ model_stemcount_distance <- lmer(SC_ns ~ distance_from_2016 + (1|Foreland_Code),
 
 summary(model_stemcount_distance)
 anova(model_stemcount_distance)
-
+#residuals
+modplot_stemcount <- plot(model_stemcount_distance)
+#definitely cone shaped
+#visreg model
 vis_stemcount_distance <- visreg(model_stemcount_distance, 
-                                 main="Predicted Average Stem Count vs. Distance from 2016 Glacial
+                                 main="Predicted Average Stem Count vs. Distance from 2016  Glacial
                                  Terminus",
                                  ylab="Predicted Average Stem Count",
                                  xlab="Distance from 2016 Terminus",
                                  gg=TRUE,
                                  line.par=list(col='orange'),
                                  points.par=list(col='red',cex=1, pch=1))
+
+
+#model for stemcount from main dataframe
+
+model_stemcount_main <- lmer(Stem_Count ~ Distance_from_Glacial_Terminus_.m. + (1|Foreland_Code/Site),data=df_no_seedlings)
+#visreg
+vis_stemcount_main <- visreg(
+  model_stemcount_main,
+  main = "Predicted Average Stem Count vs. Distance from 2016  Glacial
+  Terminus",
+  ylab = "Predicted Average Stem Count",
+  xlab = "Distance from 2016 Terminus",
+  gg = TRUE,
+  line.par = list(col =
+                    'orange'),
+  points.par = list(col =
+                      'red', cex = 1, pch = 1)
+)
+
+
 
 
 #########################################Proportion Flowering and Distance from 2016##############
@@ -385,6 +412,31 @@ flowering_timezone_scatter <- ggplot(prop_flowering, aes(x = distance_from_2016,
 model_flowering_distance <- lmer(prop_f_site ~ distance_from_2016 + (1|Foreland_Code), data=prop_flowering_ns)
 summary(model_flowering_distance)
 anova(model_flowering_distance)
+#looking at residuals
+modplot_f <- plot(model_flowering_distance)
+#look okay
+
+###model for flowering and distance from main dataframe (no seedlings)
+###don't actually know which model to use
+model_flowering_main <- glmer(flowering_numerical ~ dist + (1|Foreland_Code), data=df_no_seedlings, family="binomial"(link=log))
+summary(model_flowering_main)
+anova(model_flowering_main)
+#residuals
+modplot_main_flowering <- plot(model_flowering_main)
+
+#visreg for model
+vis_flowering_main <- visreg(
+  model_flowering_main,
+  main = "Predicted Proportion of Flowering Plants vs. Distance from 2016 Glacial
+  Terminus",
+  ylab = "Predicted Proportion of Flowering Plants",
+  xlab = "Distance from 2016 Terminus",
+  gg = TRUE,
+  line.par = list(col = 'orange'),
+  points.par = list(col = 'red', cex = 1, pch =
+                      #add call
+                      1))
+
 
 install.packages("viridis")
 library(viridis)
@@ -423,14 +475,21 @@ vistest <- visreg(
 ############################Seedlings and Distance from 2016###########################
 library(ggplot2)
 
-#scale variables
-prop_flowering$distance_scaled <- scale(prop_flowering$distance_from_2016, center=TRUE)[,1]
-prop_flowering$elev_scaled <- scale(prop_flowering$elev, center=TRUE)[,1]
+#scale variables - don't need
+#prop_flowering$distance_scaled <- scale(prop_flowering$distance_from_2016, center=TRUE)[,1]
+#prop_flowering$elev_scaled <- scale(prop_flowering$elev, center=TRUE)[,1]
 
 model_seedlings_distance <- lmer(number_of_seedlings ~ distance_from_2016 + (1|Foreland_Code), data=prop_flowering)
-
 summary(model_seedlings_distance)
 anova(model_seedlings_distance)
+#looking at residuals
+modplot_s <- plot(model_seedlings_distance)
+#looks okay
+
+#from main dataframe
+
+
+
 vis_seedlings_distance <- visreg(
   model_seedlings_distance,
   main = "Predicted Number of Seedlings vs. Distance from 2016 Glacial Terminus",
