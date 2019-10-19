@@ -296,8 +296,7 @@ summary(model_density_distance)
 anova(model_density_distance)
 model_density_distance
 #residuals
-modplot_d <- plot(model_density_distance)
-#cone shaped? 
+resid_plot_distance <- plot(model_density_distance)
 
 
 vis_density_distance <- visreg(
@@ -384,7 +383,8 @@ vis_stemcount_main <- visreg(
   points.par = list(col =
                       'red', cex = 1, pch = 1)
 )
-
+resid_plot_stemcount <- plot(model_stemcount_main)
+#possibly overrepresented on lower end? 
 
 #########################################Proportion Flowering and Distance from 2016##############
 
@@ -408,30 +408,28 @@ flowering_distance_scatter <- ggplot(prop_flowering, aes(x = distance_from_2016,
 #prop_flowering_ns$distance_scaled <- scale(prop_flowering_ns$distance_from_2016, center=TRUE)[,1]
 #prop_flowering_ns$elev_scaled <- scale(prop_flowering_ns$elev, center=TRUE)[,1]
 
+###remake model for prop flowering averages#################
+
 ###model for flowering and distance (no seedlings)
 
-model_flowering_distance <- lmer(prop_f_site ~ distance_from_2016 + (1|Foreland_Code), data=prop_flowering_ns)
+model_flowering_main <- glmer(flowering_factor ~ distance_scaled + (1|Foreland_Code), data = df_no_seedlings, family = "binomial")
 summary(model_flowering_distance)
 anova(model_flowering_distance)
 #looking at residuals
 modplot_f <- plot(model_flowering_distance)
-#look okay
+#looks okay
 
 ###model for flowering and distance from main dataframe (no seedlings)
 
 #change flowering to factor
 df_no_seedlings$flowering_factor <- as.factor(df_no_seedlings$flowering_numerical)
 
-#scatterplot for whole dataframe
-flowering_main_scatter <- ggplot(df_no_seedlings, aes(x = dist, y = flowering_numerical, fill= Foreland_Code)) + geom_point()+geom_smooth(method="lm")+ labs(x="Distance from 2016 Line (m)", y="Proportion Flowering", title="Proportion Flowering vs. Distance from 2016")
-
 #standardize predictor variable
 library(standardize)
-df_no_seedlings$distance_standardized <- scale(df_no_seedlings$dist)
-
+df_no_seedlings$distance_scaled <- scale(df_no_seedlings$dist)
 
 #model
-model_flowering_main <- glmer(flowering_numerical ~ distance_standardized + (1|Foreland_Code),data=df_no_seedlings,family=binomial(link="logit"))
+model_flowering_main <- glmer(flowering_factor ~ distance_scaled + (1|Foreland_Code), data = df_no_seedlings, family = "binomial")
 summary(model_flowering_main)
 anova(model_flowering_main)
 
@@ -508,15 +506,21 @@ modplot_s <- plot(model_seedlings_distance)
 
 #make seedling (0 stem count) a "Y" "N" binary in new column
 lewisii_data$seedling <- ifelse(lewisii_data$Stem_Count=='0', 1,0)
+lewisii_data$seedling_factor <- as.factor(lewisii_data$seedling)
 #scale distance
 #lewisii_data$distance_scaled <- scale(lewisii_data$dist)
 
 #model
-model_seedlings_main <-glmer(seedling ~ dist + (1|Foreland_Code), data=lewisii_data,family=binomial(link="logit"))
-summary(model_seedlings_distance)
-anova(model_seedlings_distance)
+#scale distance
+lewisii_data$distance_scaled <- scale(lewisii_data$Distance_from_Glacial_Terminus_.m.)
+#make model
+model_seedlings_main <- glmer(seedling_factor ~ distance_scaled + (1|Foreland_Code), data = lewisii_data, family = "binomial")
+summary(model_seedlings_main)
+anova(model_seedlings_main)
 
-vis_seedlings_distance <- visreg(
+
+#visreg
+vis_seedlings_main <- visreg(
   model_seedlings_main,
   main = "Predicted Number of Seedlings vs. Distance from 2016 Glacial Terminus",
   ylab = "Predicted Number of Seedlings",
