@@ -33,6 +33,8 @@ vis_density_distance <- visreg(
   line.par = list(col = 'orange'),
   points.par = list(col = 'red', cex = 1, pch =
                       1))
+#add later?
+geom_smooth(col='#FF4E37', fill='#FF4E37')
 
 ############################################Stem Count and Distance from 2016######################
 
@@ -64,6 +66,9 @@ avg_stemcount_ns$stemcount_scaled <- scale(avg_stemcount_ns$SC_ns, center=TRUE)[
 
 #######model for stem count and distance (from averages)############
 
+#scale distance
+avg_stemcount_ns$distance_scaled <- scale(avg_stemcount_ns$distance_from_2016, center=TRUE)[,1]
+
 model_stemcount_distance <- lmer(SC_ns ~ distance_scaled + (1|Foreland_Code),data=avg_stemcount_ns)
 
 summary(model_stemcount_distance)
@@ -83,9 +88,9 @@ vis_stemcount_distance <- visreg(model_stemcount_distance,
 
 
 #####################model for stemcount and distance (from main dataframe)##################
-
-model_stemcount_main <- lmer(Stem_Count ~ distance_scaled + (1|Foreland_Code),data=df_no_seedlings)
-summary(model_stemcount_main)
+df_no_seedlings$distance_scaled <- scale(df_no_seedlings$dist, center=TRUE)[,1]
+library(optimx)
+model_stemcount_main <- lmer(Stem_Count ~ distance_scaled + (1|Foreland_Code/Site),data=df_no_seedlings)
 anova(model_stemcount_main)
 
 #visreg
@@ -102,6 +107,11 @@ vis_stemcount_main <- visreg(
                       'red', cex = 1, pch = 1)
 )
 resid_plot_stemcount <- plot(model_stemcount_main)
+
+#ggeffects
+install.packages("ggeffects")
+library(ggeffects)
+stemcountggtest <- ggpredict(model_stemcount_main,"distance_scaled") %>% plot
 
 
 #########################################Proportion Flowering and Distance from 2016##############
@@ -145,28 +155,29 @@ lewisii_data2$jday <- lewisii_data2$Julian.Day
 #install.packages("optimx")
 library(optimx)
 
-model_flowering_main <- glmer(flowering_factor ~ distance_scaled +(1|Foreland_Code)+(1|jday), data = lewisii_data2, family = "binomial")
-#optimizer code?
-control = glmerControl(optimizer = "optimx", calc.derivs = FALSE, optCtrl = list(method = "nlminb", starttests = FALSE,kkt = FALSE))
+model_flowering_main <- glmer(flowering_factor ~ distance_scaled +(1|Foreland_Code), data = df_no_seedlings, family = "binomial")
+                
+#optimizer code?                                           
+control = glmerControl(optimizer ='optimx', optCtrl=list(method='nlminb'))
                               
-summary(model_flowering_distance)
-anova(model_flowering_distance)
+summary(model_flowering_main)
+anova(model_flowering_main)
 resid_plot_flowering <- plot(model_flowering_main)
 
 vis_model_flowering <- visreg(
   model_flowering_main,
   main = "Predicted Average Stem Count vs. Distance from 2016  Glacial
   Terminus",
-  ylab = "Predicted Average Stem Count",
+  gg=TRUE,
+  ylab = "log(Predicted Average Stem Count)",
   xlab = "Distance from 2016 Terminus",
-  gg = TRUE,
-  line.par = list(col =
-                    'orange'),
+  line.par = list(col = 'orange'),
   points.par = list(col =
-                      'red', cex = 1, pch = 1)
-)
+                      'red', cex = 1, pch = 1))
+ 
+
 #looking at residuals
-modplot_f <- plot(model_flowering_distance)
+modplot_f <- plot(model_flowering_main)
 #looks okay
 #glm instead of glmer (don't use)
 #model_flowering_glm <- glm(flowering_factor ~ dist, data=df_no_seedlings, family="binomial")
@@ -263,12 +274,13 @@ summary(model_seedlings_main)
 anova(model_seedlings_main)
 resid_plot_seedlings <- plot(model_seedlings_main)
 
-#use glm instead of glmer
-fit = glm(seedling ~ distance_scaled, data=lewisii_data, family=binomial)
-newdatseedlings <- data.frame(dist=seq(min(lewisii_data$distance_scaled), max(lewisii_data$distance_scaled),len=3390))
-newdatseedlings$seedling = predict(fit, newdata1=newdatseedlings, type="response")
-plot(seedling ~ distance_scaled, data=lewisii_data, col="red4")
-lines(seedling ~ lewisii_data$distance_scaled, newdatseedlings, col="green4", lwd=2)
+#doing likelihood ratio test instead of anova (more appropriate)
+install.packages("lmtest")
+library(lmtest)
+#null model
+model_seedlings_null <- glmer(seedling_factor ~ (1|Foreland_Code), data = lewisii_data, family = "binomial")
+#lrtest
+lrtest(model_seedlings_main,model_seedlings_null)
 
 #visreg
 vis_seedlings_main <- visreg(
@@ -277,10 +289,20 @@ vis_seedlings_main <- visreg(
   ylab = "Predicted Number of Seedlings",
   xlab = "Distance from 2016 Terminus",
   gg = TRUE,
+  scale=("response"),
   line.par = list(col = 'orange'),
   points.par = list(col = 'red', cex =
                       1, pch = 1)
 )
+
+#trying ggeffects
+library(ggeffects)
+
+ggseedling <- ggpredict(model_seedlings_main,terms="distance_scaled")
+ggseedlingplot <- plot(ggtest,rawdata=TRUE) + labs(
+  x = "Scaled Distance from Glacial Terminus", 
+  y = "Predicted Seedling Probability", 
+  title = "Probability of being a Seedling vs. Distance from Glacial Terminus")
 
 ####################################putting models on one page######################################################
 
