@@ -36,6 +36,16 @@ vis_density_distance <- visreg(
 #add later?
 geom_smooth(col='#FF4E37', fill='#FF4E37')
 
+#ggeffects 
+ggdensity <- ggpredict(model_density_distance,terms=c("distance_scaled","Foreland_Code.x"),back.transform = FALSE)
+ggdensityplot <- plot(ggdensity,rawdata=TRUE) + labs(
+  x = "Scaled Distance from Glacial Terminus", 
+  y = "log(Predicted Population Density)",
+  title="",
+  colour="Foreland")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+  panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
 ############################################Stem Count and Distance from 2016######################
 
 #make different dataframe with no 0 count (seedlings) in Stem Count column
@@ -91,6 +101,7 @@ vis_stemcount_distance <- visreg(model_stemcount_distance,
 df_no_seedlings$distance_scaled <- scale(df_no_seedlings$dist, center=TRUE)[,1]
 library(optimx)
 model_stemcount_main <- lmer(Stem_Count ~ distance_scaled + (1|Foreland_Code/Site),data=df_no_seedlings)
+summary(model_stemcount_main)
 anova(model_stemcount_main)
 
 #visreg
@@ -109,9 +120,14 @@ vis_stemcount_main <- visreg(
 resid_plot_stemcount <- plot(model_stemcount_main)
 
 #ggeffects
-install.packages("ggeffects")
-library(ggeffects)
-stemcountggtest <- ggpredict(model_stemcount_main,"distance_scaled") %>% plot
+ggstemcount <- ggpredict(model_stemcount_main,terms=c("distance_scaled","Foreland_Code"))
+ggstemcountplot <- plot(ggstemcount,rawdata=TRUE) + labs(
+  x = "Scaled Distance from Glacial Terminus", 
+  y = "Predicted Stem Count",
+  title="",
+  colour="Foreland") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+  panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
 
 #########################################Proportion Flowering and Distance from 2016##############
@@ -156,7 +172,7 @@ lewisii_data2$jday <- lewisii_data2$Julian.Day
 library(optimx)
 
 model_flowering_main <- glmer(flowering_factor ~ distance_scaled +(1|Foreland_Code), data = df_no_seedlings, family = "binomial")
-                
+
 #optimizer code?                                           
 control = glmerControl(optimizer ='optimx', optCtrl=list(method='nlminb'))
                               
@@ -164,6 +180,14 @@ summary(model_flowering_main)
 anova(model_flowering_main)
 resid_plot_flowering <- plot(model_flowering_main)
 
+#lrtest
+#null model
+model_flowering_null <- glmer(flowering_factor ~ (1|Foreland_Code), data = df_no_seedlings, family = "binomial")
+#lrtest
+lrtest(model_flowering_main,model_flowering_null)
+
+
+#visreg
 vis_model_flowering <- visreg(
   model_flowering_main,
   main = "Predicted Average Stem Count vs. Distance from 2016  Glacial
@@ -183,6 +207,15 @@ modplot_f <- plot(model_flowering_main)
 #model_flowering_glm <- glm(flowering_factor ~ dist, data=df_no_seedlings, family="binomial")
 #summary(model_flowering_glm)
 #visflowering_glm <- visreg(model_flowering_glm)
+
+#ggeffects 
+ggflowering <- ggpredict(model_flowering_main,terms=c("distance_scaled","Foreland_Code"))
+ggfloweringplot <- plot(ggflowering,rawdata=TRUE) + labs(
+  x = "Scaled Distance from Glacial Terminus", 
+  y = "Predicted Probability of Flowering",
+  title="",
+  colour="Foreland")+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+  panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
 
 ########################model for flowering and distance from averages############
@@ -270,6 +303,9 @@ lewisii_data$seedling_factor <- as.factor(lewisii_data$seedling)
 lewisii_data$distance_scaled <- scale(lewisii_data$Distance_from_Glacial_Terminus_.m.,center=TRUE)[,1]
 #make model
 model_seedlings_main <- glmer(seedling_factor ~ distance_scaled + (1|Foreland_Code), data = lewisii_data, family = "binomial")
+#model with site as well (singular fit)
+model_seedlings_alt <- glmer(seedling_factor ~ distance_scaled + (1|Foreland_Code/Site), data = lewisii_data, family = "binomial")
+
 summary(model_seedlings_main)
 anova(model_seedlings_main)
 resid_plot_seedlings <- plot(model_seedlings_main)
@@ -279,8 +315,11 @@ install.packages("lmtest")
 library(lmtest)
 #null model
 model_seedlings_null <- glmer(seedling_factor ~ (1|Foreland_Code), data = lewisii_data, family = "binomial")
+
 #lrtest
 lrtest(model_seedlings_main,model_seedlings_null)
+#lrtest with Foreland/Site model
+lrtest(model_seedlings_alt,model_seedlings_null)
 
 #visreg
 vis_seedlings_main <- visreg(
@@ -292,38 +331,47 @@ vis_seedlings_main <- visreg(
   scale=("response"),
   line.par = list(col = 'orange'),
   points.par = list(col = 'red', cex =
-                      1, pch = 1)
-)
+                      1, pch = 1))
 
 #trying ggeffects
 library(ggeffects)
+#install.packages("effects")
+library(effects)
+#install.packages("ggExtra")
+library(ggExtra)
 
-ggseedling <- ggpredict(model_seedlings_main,terms="distance_scaled")
-ggseedlingplot <- plot(ggtest,rawdata=TRUE) + labs(
+
+ggseedling <- ggpredict(model_seedlings_main, terms=c("distance_scaled","Foreland_Code"))
+ggseedlingplot <- plot(ggseedling,rawdata=TRUE) + labs(
   x = "Scaled Distance from Glacial Terminus", 
-  y = "Predicted Seedling Probability", 
-  title = "Probability of being a Seedling vs. Distance from Glacial Terminus")
+  y = "Predicted Seedling Probability",
+  title="",
+  colour="Foreland")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+  panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+#for alt model
+ggseedling_alt <- ggpredict(model_seedlings_alt, terms=c("distance_scaled","Foreland_Code"))
+ggseedlingplot_alt <- plot(ggseedling_alt,rawdata=TRUE,ci=TRUE,ci.style="ribbon") + labs(
+  x = "Scaled Distance from Glacial Terminus", 
+  y = "Predicted Seedling Probability",
+  title="",
+  colour="Foreland")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
 
 ####################################putting models on one page######################################################
 
 library(gridExtra)
 gridmodels <- grid.arrange(vis_density_distance,vis_flowering_main,vis_stemcount_main,vis_seedlings_main, ncol=2)
+gridmodels2 <- grid.arrange(ggseedlingplot,ggdensityplot,ggfloweringplot,ggstemcountplot)
 
 ###residuals plots
 
 gridresiduals <- grid.arrange(resid_plot_distance,resid_plot_flowering,resid_plot_seedlings,resid_plot_stemcount)
 
                         
-##########notes ect#####################
-                            
 
-#think about using spatial analysis packages
-#LR test or AIC values (which is lower) to see if slope and intercept is a better fit or just intercept
-
-#change interactions in model (*)
-#scale variables (just predictors)
-#+ centre = true
-#look at model diagnostics
-#put anova tables into a csv
 
 
